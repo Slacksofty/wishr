@@ -1,0 +1,5 @@
+target/
+wishr.db
+.git/
+.cargo/
+.claude/
