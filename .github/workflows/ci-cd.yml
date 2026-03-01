@@ -1,0 +1,113 @@
+name: CI / CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  CARGO_TERM_COLOR: always
+  # Disable incremental compilation in CI — avoids stale artifact issues
+  CARGO_INCREMENTAL: "0"
+  # Must match Dockerfile and devcontainer
+  CARGO_LEPTOS_VERSION: "0.3.5"
+  IMAGE_NAME: ghcr.io/slacksofty/wishr
+
+jobs:
+  # ── CI: Lint, Type-check, Test, Build ──────────────────────────────────────
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Cache Cargo dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-all-crates: "true"
+
+      - name: Install cargo-leptos (prebuilt binary)
+        run: |
+          curl -L \
+            "https://github.com/leptos-rs/cargo-leptos/releases/download/v${CARGO_LEPTOS_VERSION}/cargo-leptos-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz -C /usr/local/bin
+          chmod +x /usr/local/bin/cargo-leptos
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (SSR — native target)
+        run: cargo clippy --features ssr --target x86_64-unknown-linux-gnu -- -D warnings
+
+      - name: Clippy (hydrate — wasm32 target)
+        run: cargo clippy --features hydrate --target wasm32-unknown-unknown -- -D warnings
+
+      - name: Type-check SSR
+        run: cargo check --features ssr
+
+      - name: Type-check hydrate
+        run: cargo check --features hydrate --target wasm32-unknown-unknown
+
+      - name: Run tests
+        # No DATABASE_URL needed — project uses sqlx::query() (runtime-checked),
+        # not sqlx::query!() (compile-time-checked).
+        run: cargo test --features ssr
+
+      - name: Full release build
+        run: cargo leptos build --release
+
+  # ── CD: Build and push Docker image to GHCR ────────────────────────────────
+  cd:
+    name: CD
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          # Cache Docker layers between pushes (critical: the cargo-leptos install
+          # layer in the Dockerfile takes ~5 min cold; mode=max caches all layers)
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
