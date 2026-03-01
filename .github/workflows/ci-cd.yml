@@ -39,8 +39,8 @@ jobs:
         run: |
           curl -L \
             "https://github.com/leptos-rs/cargo-leptos/releases/download/v${CARGO_LEPTOS_VERSION}/cargo-leptos-x86_64-unknown-linux-gnu.tar.gz" \
-            | tar -xz -C /usr/local/bin
-          chmod +x /usr/local/bin/cargo-leptos
+            | tar -xz --strip-components=1 -C /usr/local/bin \
+              "cargo-leptos-x86_64-unknown-linux-gnu/cargo-leptos"
 
       - name: Check formatting
         run: cargo fmt --all -- --check
