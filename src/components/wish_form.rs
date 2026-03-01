@@ -30,15 +30,12 @@ pub fn WishForm() -> impl IntoView {
     let submitting = RwSignal::new(false);
 
     // Prefill form when editing
-    let existing = Resource::new(
-        edit_id,
-        |id| async move {
-            match id {
-                Some(id) => get_wish_item(id).await.ok(),
-                None => None,
-            }
-        },
-    );
+    let existing = Resource::new(edit_id, |id| async move {
+        match id {
+            Some(id) => get_wish_item(id).await.ok(),
+            None => None,
+        }
+    });
 
     // Populate signals when item loads
     Effect::new(move |_| {

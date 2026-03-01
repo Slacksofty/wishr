@@ -7,6 +7,6 @@ pub mod server;
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use app::App;
-    _ = console_error_panic_hook::set_once();
+    console_error_panic_hook::set_once();
     leptos::mount::hydrate_body(App);
 }
