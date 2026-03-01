@@ -165,6 +165,7 @@ pub async fn get_wish_item(id: i64) -> Result<WishItem, ServerFnError> {
 }
 
 #[server]
+#[allow(clippy::too_many_arguments)]
 pub async fn create_wish_item(
     list_id: i64,
     name: String,
@@ -222,6 +223,7 @@ pub async fn create_wish_item(
 }
 
 #[server]
+#[allow(clippy::too_many_arguments)]
 pub async fn update_wish_item(
     id: i64,
     name: String,

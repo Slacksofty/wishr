@@ -17,8 +17,8 @@ pub fn WishList() -> impl IntoView {
     };
 
     // Returns ItemListSummary which includes estimated_budget
-    let list_info = Resource::new(move || list_id(), |id| get_item_list_detail(id));
-    let items = Resource::new(move || list_id(), |id| get_wish_items(id));
+    let list_info = Resource::new(list_id, get_item_list_detail);
+    let items = Resource::new(list_id, get_wish_items);
     let all_lists = Resource::new(|| (), |_| get_item_lists_with_stats());
 
     let refetch_items = move || items.refetch();

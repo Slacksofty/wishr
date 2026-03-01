@@ -14,9 +14,9 @@ pub fn ListArchive() -> impl IntoView {
         })
     };
 
-    let list_info = Resource::new(move || list_id(), |id| get_item_list_detail(id));
-    let archive = Resource::new(move || list_id(), |id| get_archive_for_list(id));
-    let stats = Resource::new(move || list_id(), |id| get_list_stats(id));
+    let list_info = Resource::new(list_id, get_item_list_detail);
+    let archive = Resource::new(list_id, get_archive_for_list);
+    let stats = Resource::new(list_id, get_list_stats);
 
     view! {
         <div class="page">

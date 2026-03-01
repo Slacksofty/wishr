@@ -31,7 +31,7 @@ pub fn WishForm() -> impl IntoView {
 
     // Prefill form when editing
     let existing = Resource::new(
-        move || edit_id(),
+        edit_id,
         |id| async move {
             match id {
                 Some(id) => get_wish_item(id).await.ok(),
