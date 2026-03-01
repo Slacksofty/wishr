@@ -9,7 +9,11 @@ use leptos_router::hooks::use_params_map;
 pub fn WishList() -> impl IntoView {
     let params = use_params_map();
     let list_id = move || {
-        params.with(|p| p.get("list_id").and_then(|s| s.parse::<i64>().ok()).unwrap_or(0))
+        params.with(|p| {
+            p.get("list_id")
+                .and_then(|s| s.parse::<i64>().ok())
+                .unwrap_or(0)
+        })
     };
 
     // Returns ItemListSummary which includes estimated_budget
@@ -184,7 +188,9 @@ fn WishCard(
         let on_change = on_change.clone();
         move |_: web_sys::MouseEvent| {
             let target = move_target.get();
-            if target == 0 { return; }
+            if target == 0 {
+                return;
+            }
             let on_change = on_change.clone();
             spawn_local(async move {
                 let _ = transfer_wish_item(item_id, target).await;
@@ -305,7 +311,9 @@ fn BuyModal(
     on_purchased: impl Fn() + Clone + Send + 'static,
 ) -> impl IntoView {
     let cost_str = RwSignal::new(
-        estimated_cost.map(|c| format!("{:.2}", c)).unwrap_or_default()
+        estimated_cost
+            .map(|c| format!("{:.2}", c))
+            .unwrap_or_default(),
     );
     let notes = RwSignal::new(String::new());
     let error = RwSignal::new(Option::<String>::None);

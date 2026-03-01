@@ -1,6 +1,6 @@
 use crate::components::{
-    archive::Archive, list_archive::ListArchive, lists_home::ListsHome,
-    wish_form::WishForm, wish_list::WishList,
+    archive::Archive, list_archive::ListArchive, lists_home::ListsHome, wish_form::WishForm,
+    wish_list::WishList,
 };
 use leptos::prelude::*;
 use leptos_meta::*;

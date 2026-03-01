@@ -7,7 +7,11 @@ use leptos_router::hooks::use_params_map;
 pub fn ListArchive() -> impl IntoView {
     let params = use_params_map();
     let list_id = move || {
-        params.with(|p| p.get("list_id").and_then(|s| s.parse::<i64>().ok()).unwrap_or(0))
+        params.with(|p| {
+            p.get("list_id")
+                .and_then(|s| s.parse::<i64>().ok())
+                .unwrap_or(0)
+        })
     };
 
     let list_info = Resource::new(move || list_id(), |id| get_item_list_detail(id));

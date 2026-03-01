@@ -8,11 +8,13 @@ use leptos_router::hooks::{use_navigate, use_params_map};
 pub fn WishForm() -> impl IntoView {
     let params = use_params_map();
     let list_id = move || {
-        params.with(|p| p.get("list_id").and_then(|s| s.parse::<i64>().ok()).unwrap_or(1))
+        params.with(|p| {
+            p.get("list_id")
+                .and_then(|s| s.parse::<i64>().ok())
+                .unwrap_or(1)
+        })
     };
-    let edit_id = move || {
-        params.with(|p| p.get("id").and_then(|s| s.parse::<i64>().ok()))
-    };
+    let edit_id = move || params.with(|p| p.get("id").and_then(|s| s.parse::<i64>().ok()));
     let is_edit = move || edit_id().is_some();
 
     // Form fields
@@ -43,7 +45,11 @@ pub fn WishForm() -> impl IntoView {
         if let Some(Some(item)) = existing.get() {
             name.set(item.name);
             description.set(item.description.unwrap_or_default());
-            estimated_cost.set(item.estimated_cost.map(|c| format!("{:.2}", c)).unwrap_or_default());
+            estimated_cost.set(
+                item.estimated_cost
+                    .map(|c| format!("{:.2}", c))
+                    .unwrap_or_default(),
+            );
             want_level.set(item.want_level);
             need_level.set(item.need_level);
             where_to_buy.set(item.where_to_buy.unwrap_or_default());
