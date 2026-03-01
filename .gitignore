@@ -1,2 +1,4 @@
 /target
 /wishr.db
+/.cargo
+/.claude

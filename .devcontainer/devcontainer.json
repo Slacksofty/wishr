@@ -1,0 +1,35 @@
+{
+  "name": "wishr",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // Forward the dev server so http://localhost:3000 works on the host
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "wishr", "onAutoForward": "openBrowser" }
+  },
+
+  // Pre-warm the cargo registry so the first build is faster
+  "postCreateCommand": "cargo fetch",
+
+  "remoteEnv": {
+    // DB lives in the workspace folder → persists on your filesystem
+    "DATABASE_URL": "sqlite:./wishr.db"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        // Point rust-analyzer at the SSR feature set for full server-side completion
+        "rust-analyzer.cargo.features": ["ssr"],
+        "rust-analyzer.check.features": ["ssr"]
+      }
+    }
+  }
+}
