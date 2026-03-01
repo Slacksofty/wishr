@@ -1,0 +1,65 @@
+[package]
+name = "wishr"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+leptos = { version = "0.7", features = [] }
+leptos_meta = { version = "0.7" }
+leptos_router = { version = "0.7" }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+# SSR-only deps
+leptos_axum = { version = "0.7", optional = true }
+axum = { version = "0.7", optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+tower = { version = "0.4", optional = true }
+tower-http = { version = "0.5", features = ["fs"], optional = true }
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio-rustls", "macros", "migrate"], optional = true }
+chrono = { version = "0.4", features = ["serde"], optional = true }
+simple_logger = { version = "5", optional = true }
+log = { version = "0.4", optional = true }
+
+# WASM-only deps
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1"
+
+[features]
+default = []
+hydrate = [
+    "leptos/hydrate",
+]
+ssr = [
+    "dep:axum",
+    "dep:tokio",
+    "dep:tower",
+    "dep:tower-http",
+    "dep:leptos_axum",
+    "dep:sqlx",
+    "dep:chrono",
+    "dep:simple_logger",
+    "dep:log",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+]
+
+[package.metadata.leptos]
+output-name = "wishr"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+style-file = "style/main.scss"
+bin-features = ["ssr"]
+lib-features = ["hydrate"]
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
