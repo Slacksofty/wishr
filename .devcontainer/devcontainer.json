@@ -7,6 +7,9 @@
   // Forward the dev server so http://localhost:3000 works on the host
   "remoteUser": "vscode",
 
+  // Forward the host SSH agent so git push works without copying keys into the container
+  "forwardAgent": true,
+
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": { "label": "wishr", "onAutoForward": "openBrowser" }
