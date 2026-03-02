@@ -1,5 +1,7 @@
 # ── Stage 1: Build ────────────────────────────────────────────────────────────
-FROM rust:1.85-slim AS builder
+FROM rust:slim AS builder
+
+ARG CARGO_LEPTOS_VERSION=0.3.5
 
 RUN apt-get update && apt-get install -y \
     pkg-config libssl-dev curl \
@@ -8,8 +10,11 @@ RUN apt-get update && apt-get install -y \
 # WASM compilation target
 RUN rustup target add wasm32-unknown-unknown
 
-# Install cargo-leptos (cached as its own layer — only rebuilt on FROM/apt changes)
-RUN cargo install cargo-leptos --version 0.3.5 --locked
+# Install cargo-leptos via prebuilt binary (avoids Rust MSRV chasing)
+RUN curl -L \
+    "https://github.com/leptos-rs/cargo-leptos/releases/download/v${CARGO_LEPTOS_VERSION}/cargo-leptos-x86_64-unknown-linux-gnu.tar.gz" \
+    | tar -xz --strip-components=1 -C /usr/local/bin \
+      "cargo-leptos-x86_64-unknown-linux-gnu/cargo-leptos"
 
 WORKDIR /app
 COPY . .
