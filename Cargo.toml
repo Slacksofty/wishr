@@ -57,6 +57,11 @@ style-file = "style/main.scss"
 bin-features = ["ssr"]
 lib-features = ["hydrate"]
 
+[profile.release]
+strip = true
+lto = "thin"
+codegen-units = 1
+
 [profile.wasm-release]
 inherits = "release"
 opt-level = "z"
